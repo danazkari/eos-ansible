@@ -1,0 +1,16 @@
+---
+
+ - name: stop service
+   shell: cd /opt/JungleTestnet && /bin/bash -x stop.sh
+   tags:
+     - stop
+
+ - name: start service
+   shell: cd /opt/JungleTestnet && /bin/bash -x start.sh
+   tags:
+     - start
+
+ - name: restart service
+   shell: cd /opt/JungleTestnet && /bin/bash -x stop.sh && /bin/bash -x start.sh
+   tags:
+     - restart

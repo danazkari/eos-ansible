@@ -1,0 +1,34 @@
+---
+
+ - name: /etc/eos
+   file: path=/etc/eos state=directory
+
+ - name: clone repo eos
+   git:
+     repo: https://github.com/eosio/eos
+     recursive: yes
+     dest: /opt/eos
+     update: yes
+     version: "{{ version }}"
+     track_submodules: yes
+     force: yes
+   tags:
+     - build
+
+ - name: submodules
+   shell: cd /opt/eos && git submodule update --init --recursive
+   tags:
+     - build
+
+ - name: exec eosio_build.sh
+   expect:
+     chdir: /opt/eos
+     command: /bin/bash /opt/eos/eosio_build.sh
+     responses:
+       \?: 1
+     timeout: 7200
+   async: 7200
+   poll: 10
+   when: build == "true"
+   tags:
+     - build

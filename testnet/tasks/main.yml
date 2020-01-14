@@ -1,0 +1,40 @@
+---
+
+ - name: check cleos
+   stat: path=/opt/eos/build/programs/cleos/cleos
+   register: cleos
+
+ - name: clone repo Testnet
+   git:
+     repo: https://github.com/CryptoLions/EOS-Jungle-Testnet.git
+     dest: /opt/JungleTestnet
+     recursive: yes
+     update: yes
+     force: yes
+
+ - name: changes in scripts
+   shell: cd /opt/JungleTestnet/ && chmod -R +x *.sh Wallet/*.sh && sed -i "s/\/home\/eos-dawn-v3.0.0/\/opt/" *.sh Wallet/*.sh
+
+ - name: keys
+   shell: cd /opt/JungleTestnet && /bin/bash cleos.sh create key > /tmp/keys
+
+ - name: private key
+   shell: cat /tmp/keys | grep Private | awk {' print $3'}
+   register: private_key
+   tags:
+     - config
+
+ - name: public key
+   shell: cat /tmp/keys | grep Public | awk {' print $3'}
+   register: public_key
+   tags:
+     - config
+
+ - name: copy config.ini
+   template: src=jungle.j2 dest=/opt/JungleTestnet/config.ini
+   tags:
+     - config
+
+ - name: start testnet
+   shell: cd /opt/JungleTestnet && /bin/bash -x start.sh
+   when: cleos.stat.exists == True
